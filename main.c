@@ -20,9 +20,6 @@
 #define i2c_scl_a 1
 #define press_nivel_mar 101325.0
 #define bot_a 5
-#define green_led 11
-#define blue_led 12
-#define red_led 13
 #define i2c_port_b i2c1
 #define i2c_sda_b 14
 #define i2c_scl_b 15
@@ -63,7 +60,6 @@ pwm_struct pw = {7812.5, 32.0, false, true, 0};
 mutex_t data_mutex;
 
 void core1(void); // Função executada no segundo núcleo (core1) do RP2040. Responsável por atualizar o display OLED continuamente.
-void init_leds(void); // Inicializa os LEDs (vermelho, azul, verde) como saída digital.
 void init_botoes(void); // Inicializa os botões como entrada digital com pull-up interno.
 void init_i2c0(void); // Inicializa a interface I2C0 (usada pelos sensores BMP280 e AHT20).
 void init_i2c1(void); // Inicializa a interface I2C1 (usada pelo display OLED).
@@ -85,7 +81,6 @@ int main(){
     watchdog_enable(4000, true); //Sistema watchdog contra falhas. Caso o programa trave por mais de 4 segundos sem o watchdog_update resetar, o programa é forçado a reiniciar.
     mutex_init(&data_mutex);
     multicore_launch_core1(core1);
-    init_leds();
     init_botoes();
     init_i2c0();
     init_bmp280();
@@ -186,14 +181,6 @@ void core1(void) {
         mutex_exit(&data_mutex);
         ssd1306_send_data(&ssd);
         sleep_ms(1000);
-    }
-}
-
-void init_leds(void) {
-    for (uint8_t leds = 11; leds < 14; leds++){
-        gpio_init(leds);
-        gpio_set_dir(leds, GPIO_OUT);
-        gpio_put(leds, 0);
     }
 }
 
